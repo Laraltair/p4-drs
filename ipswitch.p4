@@ -84,8 +84,8 @@ parser ipParser(packet_in pkt, out headers hdr,
 
 control ipIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta)
 {
-    //count,length,route_number
-    register<bit<32>>(6) rgt;
+    //count,length,judge_number,threshold,route_number,route_standby,timestamp,timedifference
+    register<bit<32>>(8) rgt;
 
     bit<32> packet_count_position = 0;
     bit<32> packet_length_position = 1;
@@ -93,12 +93,17 @@ control ipIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     bit<32> threhold_position = 3;
     bit<32> route_position = 4;
     bit<32> route_standby_position = 5;
+    bit<32> timestamp_position = 6;
+    bit<32> time_diff_position = 7;
 
     bit<32> total_count = 0;
     bit<32> total_length = 0;
     bit<32> select_number = 0;
     bit<32> threhold = 0;
     bit<32> route_number = 0;
+    bit<32> timelast = 0;
+    bit<32> timenow = 0;
+    bit<32> timediff = 0;
     
     bit<32> stat_data = 0;
 
@@ -109,11 +114,16 @@ control ipIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         rgt.read(threhold, threhold_position);
         rgt.read(route_number, route_position);
         rgt.read(stat_data, select_number);
+        rgt.read(timelast, timestamp_position);
+        timenow = stdmeta.ingress_global_timestamp[31:0];
+        timediff = timenow - timelast;
     }
 
     action write_stat() {
         rgt.write(packet_count_position, 1 + total_count);
         rgt.write(packet_length_position, stdmeta.packet_length + total_length);
+        rgt.write(timestamp_position, timenow);
+        rgt.write(time_diff_position, timediff);
     }
 
     bit<32> write_route_buf1;
