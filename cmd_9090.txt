@@ -1,0 +1,13 @@
+register_write rgt 3 5
+register_write rgt 5 1
+mirroring_add 201 1
+mirroring_add 202 2
+table_add match_inport forward 1 => 2
+table_add match_inport forward 2 => 1
+table_add acquire_state read_register  => 
+table_add update_stat write_stat  => 
+table_add receive_signal handle_signal => 
+table_add match_ipv4_route_1 forward 10.0.0.1 => 1
+table_add match_ipv4_route_1 forward 10.0.0.2 => 2
+table_add match_ipv4_route_2 forward 10.0.0.1 => 1
+table_add match_ipv4_route_2 forward 10.0.0.2 => 3
